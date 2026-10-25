@@ -5,8 +5,9 @@ function escapeHtml(text: string) {
 }
 
 export async function notifyTelegram(row: RequestRow) {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  // trim и снятие префикса "bot" прощают частые ошибки при вставке токена в Vercel
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim().replace(/^bot/i, "");
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
   if (!token || !chatId) {
     console.error("TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы");
     return;
