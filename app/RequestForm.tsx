@@ -9,6 +9,7 @@ export default function RequestForm() {
   const [values, setValues] = useState<RequestInput>({ name: "", phone: "", comment: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [serverError, setServerError] = useState("");
 
   function update(field: keyof RequestInput, value: string) {
     setValues((v) => ({ ...v, [field]: value }));
@@ -34,9 +35,11 @@ export default function RequestForm() {
         setState("done");
       } else {
         if (data.errors) setErrors(data.errors);
+        setServerError(typeof data.error === "string" ? data.error : "");
         setState("error");
       }
     } catch {
+      setServerError("");
       setState("error");
     }
   }
@@ -70,7 +73,7 @@ export default function RequestForm() {
         <textarea rows={4} value={values.comment} onChange={(e) => update("comment", e.target.value)} placeholder="Букет «Розовое утро» на субботу к 12:00" aria-invalid={!!errors.comment} />
         {errors.comment && <span className="error">{errors.comment}</span>}
       </label>
-      {state === "error" && <p className="error">Не удалось отправить заявку. Проверьте данные и попробуйте ещё раз.</p>}
+      {state === "error" && <p className="error">Не удалось отправить заявку. Проверьте данные и попробуйте ещё раз.{serverError && <><br />{serverError}</>}</p>}
       <button className="btn" type="submit" disabled={state === "sending"}>
         {state === "sending" ? "Отправляем…" : "Отправить заявку"}
       </button>
