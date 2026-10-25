@@ -18,7 +18,11 @@ export default function LoginPage() {
     const { error } = await createBrowserSupabase().auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      setError("Неверный email или пароль");
+      setError(
+        error.message === "Invalid login credentials"
+          ? "Неверный email или пароль"
+          : `Ошибка входа: ${error.message}`
+      );
       return;
     }
     router.replace("/admin");
