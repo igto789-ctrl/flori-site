@@ -35,11 +35,11 @@ export default function RequestForm() {
         setState("done");
       } else {
         if (data.errors) setErrors(data.errors);
-        setServerError(typeof data.error === "string" ? data.error : "");
+        setServerError(typeof data.error === "string" ? data.error : `Код ответа сервера: ${res.status}`);
         setState("error");
       }
-    } catch {
-      setServerError("");
+    } catch (err) {
+      setServerError(`Нет связи с сервером: ${err instanceof Error ? err.message : ""}`);
       setState("error");
     }
   }

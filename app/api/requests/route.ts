@@ -4,6 +4,16 @@ import { validateRequest, type RequestRow } from "@/lib/requests";
 import { notifyTelegram } from "@/lib/telegram";
 
 export async function POST(req: Request) {
+  try {
+    return await handle(req);
+  } catch (e) {
+    console.error("Необработанная ошибка:", e);
+    const message = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: `Ошибка сервера: ${message}` }, { status: 500 });
+  }
+}
+
+async function handle(req: Request) {
   let body: unknown;
   try {
     body = await req.json();
