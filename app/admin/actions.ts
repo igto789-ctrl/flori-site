@@ -22,10 +22,6 @@ export async function moveStage(id: string, stage: string) {
   return error ? { error: error.message } : { ok: true };
 }
 
-export async function moveStageForm(formData: FormData) {
-  await moveStage(String(formData.get("id")), String(formData.get("stage")));
-}
-
 export async function saveNotes(formData: FormData) {
   const id = String(formData.get("id"));
   const notes = String(formData.get("notes") ?? "").slice(0, 5000);
