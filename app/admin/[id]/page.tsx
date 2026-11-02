@@ -31,6 +31,9 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
           <dt>Телефон</dt><dd><a href={`tel:${r.phone.replace(/[^\d+]/g, "")}`}>{r.phone}</a></dd>
           <dt>Источник</dt><dd><span className={`badge source-${r.source}`}>{SOURCES[r.source] ?? r.source}</span></dd>
           <dt>Создан</dt><dd>{formatDate(r.created_at)}</dd>
+          {r.telegram_id && (<><dt>Telegram</dt><dd>{r.telegram_username
+            ? <a href={`https://t.me/${r.telegram_username}`} target="_blank" rel="noopener">@{r.telegram_username}</a>
+            : <>ID {r.telegram_id}</>}</dd></>)}
           {r.company && (<><dt>Компания</dt><dd>{r.company}</dd></>)}
           {r.email && (<><dt>Email</dt><dd><a href={`mailto:${r.email}`}>{r.email}</a></dd></>)}
           {r.document_path && (<><dt>Оригинал</dt><dd><a href={`/admin/${r.id}/original`} target="_blank" rel="noopener">📎 Открыть документ</a></dd></>)}

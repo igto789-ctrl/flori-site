@@ -1,11 +1,6 @@
 import RequestForm from "./RequestForm";
+import { BOUQUETS } from "@/lib/catalog";
 
-const bouquets = [
-  { name: "Розовое утро", desc: "15 пионовидных роз, эвкалипт", price: "750 лей", emoji: "🌹", tone: "pink" },
-  { name: "Весенний сад", desc: "Тюльпаны, ирисы, мимоза", price: "590 лей", emoji: "🌷", tone: "green" },
-  { name: "Солнечный", desc: "Подсолнухи, ромашки, лён", price: "520 лей", emoji: "🌻", tone: "yellow" },
-  { name: "Нежность", desc: "Гортензия, эустома, гвоздика", price: "890 лей", emoji: "💐", tone: "lilac" },
-];
 
 export default function Home() {
   return (
@@ -24,12 +19,12 @@ export default function Home() {
       <section className="section">
         <h2>Популярные букеты</h2>
         <div className="grid">
-          {bouquets.map((b) => (
+          {BOUQUETS.map((b) => (
             <article key={b.name} className="card">
               <div className={`card-img tone-${b.tone}`} aria-hidden>{b.emoji}</div>
               <h3>{b.name}</h3>
               <p className="muted">{b.desc}</p>
-              <p className="price">{b.price}</p>
+              <p className="price">{b.price} лей</p>
             </article>
           ))}
         </div>
