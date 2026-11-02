@@ -20,6 +20,7 @@ export function isStage(value: unknown): value is Stage {
 export const SOURCES = {
   site: "Сайт",
   manual: "Вручную",
+  card: "Визитка",
   telegram: "Telegram",
   document: "Документ",
 } as const;
@@ -32,6 +33,9 @@ export type RequestRow = {
   phone: string;
   comment: string;
   notes: string;
+  email?: string;
+  company?: string;
+  document_path?: string | null;
   source: Source;
   stage: Stage;
   created_at: string;
