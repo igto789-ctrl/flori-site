@@ -25,7 +25,10 @@ export default async function AdminPage() {
           <h1>Воронка продаж</h1>
           <p className="muted small">Перетащите карточку в другую колонку или выберите этап в списке на карточке.</p>
         </div>
-        <a href="/admin/new" className="btn btn-small">+ Добавить клиента</a>
+        <div className="row">
+          <a href="/admin/scan" className="btn btn-small btn-outline">📇 Скан визитки</a>
+          <a href="/admin/new" className="btn btn-small">+ Добавить клиента</a>
+        </div>
       </div>
       {error && <p className="error">Ошибка загрузки: {error.message}</p>}
       <Board initial={data ?? []} />
