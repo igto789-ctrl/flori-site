@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { createUserClient } from "@/lib/supabase/server";
-import { SOURCES, STAGES, STAGE_KEYS, formatDate, type RequestRow, type StageHistoryRow } from "@/lib/requests";
-import { moveStageForm, saveNotes } from "../actions";
+import { SOURCES, STAGES, formatDate, type RequestRow, type StageHistoryRow } from "@/lib/requests";
+import { saveNotes } from "../actions";
+import StageControl from "./StageControl";
 import AdminHeader from "../AdminHeader";
 
 export const dynamic = "force-dynamic";
@@ -33,19 +34,10 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
           {r.comment && (<><dt>Комментарий</dt><dd className="pre">{r.comment}</dd></>)}
         </dl>
 
-        <form action={moveStageForm} className="status-form">
-          <input type="hidden" name="id" value={r.id} />
-          <label>
-            Этап воронки
-            <select name="stage" defaultValue={r.stage}>
-              {STAGE_KEYS.map((s) => <option key={s} value={s}>{STAGES[s]}</option>)}
-            </select>
-          </label>
-          <button className="btn">Перенести</button>
-        </form>
+        <StageControl key={r.stage} id={r.id} stage={r.stage} />
 
         <h2 className="subhead">Заметки</h2>
-        <form action={saveNotes} className="form form-full">
+        <form key={r.notes} action={saveNotes} className="form form-full">
           <input type="hidden" name="id" value={r.id} />
           <textarea name="notes" rows={4} defaultValue={r.notes} placeholder="Например: хочет пионы, доставка в субботу к 12:00, звонить после 18:00" />
           <div><button className="btn btn-small">Сохранить заметки</button></div>
