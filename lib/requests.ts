@@ -36,6 +36,8 @@ export type RequestRow = {
   email?: string;
   company?: string;
   document_path?: string | null;
+  telegram_id?: number | null;
+  telegram_username?: string | null;
   source: Source;
   stage: Stage;
   created_at: string;
