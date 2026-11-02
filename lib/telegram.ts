@@ -1,4 +1,4 @@
-import { formatDate, type RequestRow } from "./requests";
+import { SOURCES, STAGES, formatDate, type RequestRow } from "./requests";
 
 function escapeHtml(text: string) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -20,7 +20,8 @@ export async function notifyTelegram(row: RequestRow) {
     `<b>Телефон:</b> ${escapeHtml(row.phone)}`,
     `<b>Комментарий:</b> ${escapeHtml(row.comment)}`,
     `<b>Время:</b> ${formatDate(row.created_at)}`,
-    `<b>Статус:</b> новая`,
+    `<b>Источник:</b> ${SOURCES[row.source]}`,
+    `<b>Этап:</b> ${STAGES[row.stage]}`,
   ].join("\n");
 
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

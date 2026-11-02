@@ -36,7 +36,7 @@ async function handle(req: Request) {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from("requests")
-    .insert(value)
+    .insert({ ...value, source: "site", stage: "new" })
     .select()
     .single<RequestRow>();
 
