@@ -1,23 +1,49 @@
-export const STATUSES = {
+// Этапы воронки продаж цветочного магазина, в порядке колонок на доске.
+// "rejected" (Отказ) — отдельный конечный этап.
+export const STAGES = {
   new: "Новая",
-  in_progress: "В работе",
-  closed: "Закрыта",
+  contacted: "Связались",
+  agreed: "Букет согласован",
+  paid: "Оплачено",
+  delivered: "Доставлено",
+  rejected: "Отказ",
 } as const;
 
-export type Status = keyof typeof STATUSES;
+export type Stage = keyof typeof STAGES;
+export const STAGE_KEYS = Object.keys(STAGES) as Stage[];
+
+export function isStage(value: unknown): value is Stage {
+  return typeof value === "string" && value in STAGES;
+}
+
+// Откуда пришёл клиент. telegram и document — заготовка для следующих блоков задания.
+export const SOURCES = {
+  site: "Сайт",
+  manual: "Вручную",
+  telegram: "Telegram",
+  document: "Документ",
+} as const;
+
+export type Source = keyof typeof SOURCES;
 
 export type RequestRow = {
   id: string;
   name: string;
   phone: string;
   comment: string;
-  status: Status;
+  notes: string;
+  source: Source;
+  stage: Stage;
   created_at: string;
 };
 
-export function isStatus(value: unknown): value is Status {
-  return typeof value === "string" && value in STATUSES;
-}
+export type StageHistoryRow = {
+  id: number;
+  request_id: string;
+  from_stage: Stage | null;
+  to_stage: Stage;
+  changed_at: string;
+};
 
 // Одна и та же функция форматирует время в Telegram и в админ-панели, чтобы оно совпадало.
 export function formatDate(iso: string) {
@@ -51,4 +77,17 @@ export function validateRequest(data: Partial<Record<keyof RequestInput, unknown
   else if (comment.length > 1000) errors.comment = "Не более 1000 символов";
 
   return { errors, value: { name, phone, comment } as RequestInput, ok: Object.keys(errors).length === 0 };
+}
+
+// Ручное добавление клиента: комментарий необязателен.
+export function validateClient(data: Partial<Record<"name" | "phone" | "comment" | "notes", unknown>>) {
+  const { errors } = validateRequest({ ...data, comment: "ok!" });
+  const comment = String(data.comment ?? "").trim();
+  const notes = String(data.notes ?? "").trim();
+  if (comment.length > 1000) errors.comment = "Не более 1000 символов";
+  return {
+    ok: Object.keys(errors).length === 0,
+    errors,
+    value: { name: String(data.name ?? "").trim(), phone: String(data.phone ?? "").trim(), comment, notes },
+  };
 }
