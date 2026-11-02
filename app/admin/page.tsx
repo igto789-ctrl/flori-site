@@ -26,6 +26,7 @@ export default async function AdminPage() {
           <p className="muted small">Перетащите карточку в другую колонку или выберите этап в списке на карточке.</p>
         </div>
         <div className="row">
+          <a href="/admin/generate" className="btn btn-small btn-outline">✨ Фото для поста</a>
           <a href="/admin/scan" className="btn btn-small btn-outline">📇 Скан визитки</a>
           <a href="/admin/new" className="btn btn-small">+ Добавить клиента</a>
         </div>
