@@ -50,6 +50,7 @@ export type StageHistoryRow = {
   from_stage: Stage | null;
   to_stage: Stage;
   changed_at: string;
+  changed_via?: string | null; // «MCP», если этап сменили через MCP-сервер
 };
 
 // Одна и та же функция форматирует время в Telegram и в админ-панели, чтобы оно совпадало.
