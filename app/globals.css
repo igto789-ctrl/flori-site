@@ -228,3 +228,21 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 
 /* Пометка в истории этапов: этап сменили через MCP */
 .via-badge { background: #1f2937; color: #fff; font-size: 11px; margin-left: 6px; }
+
+/* Счета в карточке клиента */
+.btn-ghost { background: transparent; color: var(--text, #172235); border: 1px solid var(--border); }
+.invoice-form { margin: 12px 0; }
+.invoice-line { display: grid; grid-template-columns: 1.2fr 2fr 0.6fr 0.9fr auto; gap: 8px; align-items: center; }
+.invoice-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.invoice-actions label.inline { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.invoice-actions label.inline input { width: 70px; }
+.invoice-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px; }
+.invoice-table th, .invoice-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.invoice-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.invoice-unpaid { background: #fff0c7; color: #8a5a00; }
+.invoice-paid { background: #e3f3df; color: #2f6b2a; }
+.success-inline, p.success { padding: 10px 14px; }
+@media (max-width: 640px) {
+  .invoice-line { grid-template-columns: 1fr 1fr; }
+  .invoice-table { display: block; overflow-x: auto; }
+}
