@@ -23,6 +23,7 @@ export const SOURCES = {
   card: "Визитка",
   telegram: "Telegram",
   document: "Документ",
+  voice: "Голос",
 } as const;
 
 export type Source = keyof typeof SOURCES;

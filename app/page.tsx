@@ -1,4 +1,5 @@
 import RequestForm from "./RequestForm";
+import VoiceAgent from "./VoiceAgent";
 import { BOUQUETS } from "@/lib/catalog";
 
 
@@ -16,7 +17,7 @@ export default function Home() {
         <a href="#order" className="btn">Оставить заявку</a>
       </section>
 
-      <section className="section">
+      <section className="section" id="bouquets">
         <h2>Популярные букеты</h2>
         <div className="grid">
           {BOUQUETS.map((b) => (
@@ -30,7 +31,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section features">
+      <section className="section features" id="delivery">
         <div><b>🚚 Доставка 2 часа</b><p className="muted">Бесплатно от 600 лей</p></div>
         <div><b>📸 Фото перед отправкой</b><p className="muted">Покажем букет до доставки</p></div>
         <div><b>🌿 Свежесть 7 дней</b><p className="muted">Или заменим букет</p></div>
@@ -42,7 +43,8 @@ export default function Home() {
         <RequestForm />
       </section>
 
-      <footer className="footer">© {new Date().getFullYear()} Floria · Кишинёв · <a href="/admin">Вход для владельца</a></footer>
+      <footer className="footer" id="contacts">© {new Date().getFullYear()} Floria · Кишинёв · <a href="/admin">Вход для владельца</a></footer>
+      <VoiceAgent />
     </main>
   );
 }
