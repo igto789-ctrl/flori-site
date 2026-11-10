@@ -3,6 +3,8 @@ import { createUserClient } from "@/lib/supabase/server";
 import { SOURCES, STAGES, formatDate, type RequestRow, type StageHistoryRow } from "@/lib/requests";
 import { saveNotes } from "../actions";
 import StageControl from "./StageControl";
+import InvoicePanel from "./InvoicePanel";
+import type { InvoiceRow } from "@/lib/invoices";
 import AdminHeader from "../AdminHeader";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +15,12 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: r }, { data: history }] = await Promise.all([
+  const [{ data: r }, { data: history }, { data: invoices }] = await Promise.all([
     supabase.from("requests").select("*").eq("id", id).maybeSingle<RequestRow>(),
     supabase.from("stage_history").select("*").eq("request_id", id)
       .order("changed_at", { ascending: true }).returns<StageHistoryRow[]>(),
+    supabase.from("invoices").select("*").eq("request_id", id)
+      .order("number", { ascending: false }).returns<InvoiceRow[]>(),
   ]);
   if (!r) notFound();
 
@@ -41,6 +45,8 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
         </dl>
 
         <StageControl key={r.stage} id={r.id} stage={r.stage} />
+
+        <InvoicePanel requestId={r.id} invoices={invoices ?? []} />
 
         <h2 className="subhead">Заметки</h2>
         <form key={r.notes} action={saveNotes} className="form form-full">
