@@ -143,6 +143,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .source-manual { background: #fff0c7; color: #8a5a00; }
 .source-telegram { background: #ddf3fb; color: #11698a; }
 .source-document { background: #eee5fb; color: #5b3a99; }
+.source-voice { background: #ffe4ec; color: #a3204f; }
 .stage-new { background: #ffe1ea; color: #a8325a; }
 .stage-contacted { background: #fff0c7; color: #8a5a00; }
 .stage-agreed { background: #eee5fb; color: #5b3a99; }
@@ -221,3 +222,6 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   padding: 1px 6px; border-radius: 6px;
 }
 .gen-result { flex: 1.4; }
+
+/* Раздел, который показал голосовой агент */
+.voice-highlight { outline: 3px solid #e85d8a; outline-offset: 8px; border-radius: 16px; transition: outline-color 0.3s; }
