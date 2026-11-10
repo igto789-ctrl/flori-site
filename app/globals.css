@@ -225,3 +225,6 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 
 /* Раздел, который показал голосовой агент */
 .voice-highlight { outline: 3px solid #e85d8a; outline-offset: 8px; border-radius: 16px; transition: outline-color 0.3s; }
+
+/* Пометка в истории этапов: этап сменили через MCP */
+.via-badge { background: #1f2937; color: #fff; font-size: 11px; margin-left: 6px; }

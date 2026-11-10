@@ -58,6 +58,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
               <span>
                 {h.from_stage ? <>{STAGES[h.from_stage] ?? h.from_stage} → </> : <>Создан → </>}
                 <b>{STAGES[h.to_stage] ?? h.to_stage}</b>
+                {h.changed_via && <> <span className="badge via-badge">{h.changed_via}</span></>}
               </span>
             </li>
           ))}
