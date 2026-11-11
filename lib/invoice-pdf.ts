@@ -86,7 +86,8 @@ export async function buildInvoicePdf(
     `IDNO: ${COMPANY.idno} · ${COMPANY.vat}`,
     COMPANY.address,
     `Банк: ${COMPANY.bank}`,
-    `IBAN: ${COMPANY.iban} · BIC: ${COMPANY.bic}`,
+    `IBAN: ${COMPANY.iban}`,
+    `BIC: ${COMPANY.bic}`,
     `Тел.: ${COMPANY.phone} · ${COMPANY.email}`,
   ], M);
   const yB = block("ПОКУПАТЕЛЬ", [client.name, client.company ?? "", `Тел.: ${client.phone}`, client.email ?? ""], M + W / 2 + 10);
@@ -124,7 +125,7 @@ export async function buildInvoicePdf(
   text(`Срок оплаты: до ${formatDay(inv.due_date)}. В назначении платежа укажите «Счёт № ${inv.number}».`, M, 10);
 
   if (COMPANY.isDemo) {
-    page.drawText("Демо-реквизиты для учебного проекта. Не является платёжным документом.", {
+    page.drawText("Учебный проект: реквизиты условные. Не является платёжным документом.", {
       x: M, y: M - 10, size: 8, font, color: muted,
     });
   }
