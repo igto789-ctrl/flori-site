@@ -3,12 +3,13 @@ import { NextResponse } from "next/server";
 import { createServiceClient, createUserClient } from "@/lib/supabase/server";
 import { validateClient } from "@/lib/requests";
 import { MAX_FILE_BYTES, PDF_TYPE, isAllowedType } from "@/lib/scan";
+import { isOwner } from "@/lib/auth";
 
 // Шаг 2: после проверки владельцем сохраняем оригинал в Storage и создаём карточку в воронке.
 export async function POST(req: Request) {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Сначала войдите в админку" }, { status: 401 });
+  if (!isOwner(user)) return NextResponse.json({ error: "Сначала войдите в админку" }, { status: 401 });
 
   const form = await req.formData().catch(() => null);
   const file = form?.get("file");

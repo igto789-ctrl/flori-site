@@ -6,13 +6,14 @@ import { createServiceClient, createUserClient } from "@/lib/supabase/server";
 import { DEFAULT_DUE_DAYS } from "@/lib/company";
 import { formatDay, formatMoney, invoiceFileName, validateItems, type InvoiceRow } from "@/lib/invoices";
 import { buildInvoicePdf } from "@/lib/invoice-pdf";
-import { sendTelegramDocument } from "@/lib/telegram";
+import { escapeHtml, sendTelegramDocument } from "@/lib/telegram";
 import type { RequestRow } from "@/lib/requests";
+import { isOwner } from "@/lib/auth";
 
 async function requireUser() {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!isOwner(user)) redirect("/login");
   return supabase;
 }
 
@@ -84,13 +85,13 @@ export async function sendInvoice(invoiceId: string): Promise<Result> {
   let sentTo: string;
   let err: string | null;
   if (client.telegram_id) {
-    err = await sendTelegramDocument(client.telegram_id, pdf, invoiceFileName(inv.number), `${client.name}, ${caption}`);
+    err = await sendTelegramDocument(client.telegram_id, pdf, invoiceFileName(inv.number), `${escapeHtml(client.name)}, ${caption}`);
     sentTo = `клиенту в Telegram${client.telegram_username ? ` @${client.telegram_username}` : ""}`;
   } else {
     const owner = process.env.TELEGRAM_CHAT_ID?.trim();
     if (!owner) return { error: "У клиента нет Telegram, а TELEGRAM_CHAT_ID не задан" };
     err = await sendTelegramDocument(owner, pdf, invoiceFileName(inv.number),
-      `${caption}\n\nДля: ${client.name}, ${client.phone}. У клиента нет Telegram — перешлите ему счёт.`);
+      `${caption}\n\nДля: ${escapeHtml(client.name)}, ${escapeHtml(client.phone)}. У клиента нет Telegram — перешлите ему счёт.`);
     sentTo = "владельцу в Telegram (у клиента нет Telegram)";
   }
   if (err) return { error: `Не отправлено: ${err}` };

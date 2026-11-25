@@ -6,6 +6,7 @@ import StageControl from "./StageControl";
 import InvoicePanel from "./InvoicePanel";
 import type { InvoiceRow } from "@/lib/invoices";
 import AdminHeader from "../AdminHeader";
+import { isOwner } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!isOwner(user)) redirect("/login");
 
   const [{ data: r }, { data: history }, { data: invoices }] = await Promise.all([
     supabase.from("requests").select("*").eq("id", id).maybeSingle<RequestRow>(),

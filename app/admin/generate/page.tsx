@@ -5,6 +5,7 @@ import { usage } from "@/lib/imagegen-usage";
 import { formatDate } from "@/lib/requests";
 import AdminHeader from "../AdminHeader";
 import GenerateForm from "./GenerateForm";
+import { isOwner } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +14,11 @@ type Gen = { id: string; prompt: string; aspect_ratio: string; source_path: stri
 export default async function GeneratePage() {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!isOwner(user)) redirect("/login");
 
   const [{ data: rows, error }, limit] = await Promise.all([
     supabase.from("image_generations").select("*").order("created_at", { ascending: false }).limit(30).returns<Gen[]>(),
-    usage(supabase),
+    usage(user.id),
   ]);
 
   // Временные ссылки на файлы из закрытого хранилища (на 1 час)

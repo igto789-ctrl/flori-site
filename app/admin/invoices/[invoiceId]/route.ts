@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { createServiceClient, createUserClient } from "@/lib/supabase/server";
+import { isOwner } from "@/lib/auth";
 
 // Открывает PDF счёта: временная ссылка на 5 минут, только для вошедшего владельца.
 export async function GET(req: Request, { params }: { params: Promise<{ invoiceId: string }> }) {
   const { invoiceId } = await params;
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.redirect(new URL("/login", req.url));
+  if (!isOwner(user)) return NextResponse.redirect(new URL("/login", req.url));
 
   const { data: inv } = await supabase.from("invoices").select("pdf_path").eq("id", invoiceId).maybeSingle();
   if (!inv?.pdf_path) return new NextResponse("PDF счёта не найден", { status: 404 });

@@ -28,7 +28,7 @@ export default function RequestForm() {
       const res = await fetch("/api/requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(check.value),
+        body: JSON.stringify({ ...check.value, hp: String(new FormData(e.currentTarget as HTMLFormElement).get("hp_extra") ?? "") }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
@@ -73,6 +73,13 @@ export default function RequestForm() {
         <textarea rows={4} value={values.comment} onChange={(e) => update("comment", e.target.value)} placeholder="Букет «Розовое утро» на субботу к 12:00" aria-invalid={!!errors.comment} />
         {errors.comment && <span className="error">{errors.comment}</span>}
       </label>
+      {/* Ловушка для ботов: поле скрыто от людей и от экранных дикторов. */}
+      <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+        <label>
+          Не заполняйте это поле
+          <input name="hp_extra" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </label>
+      </div>
       {state === "error" && <p className="error">Не удалось отправить заявку. Проверьте данные и попробуйте ещё раз.{serverError && <><br />{serverError}</>}</p>}
       <button className="btn" type="submit" disabled={state === "sending"}>
         {state === "sending" ? "Отправляем…" : "Отправить заявку"}

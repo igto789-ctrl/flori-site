@@ -2,6 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
 import { createUserClient } from "@/lib/supabase/server";
 import { MAX_FILE_BYTES, isAllowedType, recognizeCard } from "@/lib/scan";
+import { takeLimits } from "@/lib/rate-limit";
+import { isOwner } from "@/lib/auth";
 
 export const maxDuration = 60;
 
@@ -9,7 +11,7 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Сначала войдите в админку" }, { status: 401 });
+  if (!isOwner(user)) return NextResponse.json({ error: "Сначала войдите в админку" }, { status: 401 });
 
   if (!process.env.ANTHROPIC_API_KEY)
     return NextResponse.json({ error: "Сервер не настроен: в Vercel нет переменной ANTHROPIC_API_KEY" }, { status: 500 });
@@ -22,6 +24,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Подходят только фото (JPG, PNG) или PDF" }, { status: 400 });
   if (file.size > MAX_FILE_BYTES)
     return NextResponse.json({ error: "Файл больше 4 МБ. Сфотографируйте ещё раз или уменьшите PDF" }, { status: 400 });
+
+  // Не больше 30 распознаваний в сутки: каждый вызов платный (Claude API).
+  if (!(await takeLimits([{ kind: "scan", id: user.id, limit: 30, windowSec: 86400 }])))
+    return NextResponse.json({ error: "Лимит распознаваний на сегодня исчерпан (30 в сутки)" }, { status: 429 });
 
   try {
     const fields = await recognizeCard(Buffer.from(await file.arrayBuffer()), file.type);

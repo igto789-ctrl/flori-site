@@ -1,17 +1,12 @@
-import type { createUserClient } from "@/lib/supabase/server";
 import { DAILY_LIMIT } from "@/lib/imagegen";
+import { usedInWindow, windowEnd } from "@/lib/rate-limit";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const GEN_WINDOW_SEC = 24 * 60 * 60;
 
-// Сколько генераций пользователь сделал за последние 24 часа и когда освободится следующая.
-export async function usage(supabase: Awaited<ReturnType<typeof createUserClient>>) {
-  const since = new Date(Date.now() - DAY_MS).toISOString();
-  const { data } = await supabase
-    .from("image_generations")
-    .select("created_at")
-    .gte("created_at", since)
-    .order("created_at", { ascending: true });
-  const used = data?.length ?? 0;
-  const nextAt = used >= DAILY_LIMIT && data?.[0] ? new Date(new Date(data[0].created_at).getTime() + DAY_MS) : null;
-  return { used, remaining: Math.max(0, DAILY_LIMIT - used), nextAt };
+// Сколько генераций занято в текущих сутках (UTC) и когда лимит обнулится.
+// Тот же счётчик, что и при резервировании в /api/generate — один источник правды.
+export async function usage(userId: string) {
+  const used = await usedInWindow("gen", userId, GEN_WINDOW_SEC);
+  const remaining = Math.max(0, DAILY_LIMIT - used);
+  return { used, remaining, nextAt: remaining === 0 ? windowEnd(new Date(), GEN_WINDOW_SEC) : null };
 }

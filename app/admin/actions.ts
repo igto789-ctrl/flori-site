@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createUserClient } from "@/lib/supabase/server";
 import { isStage, validateClient } from "@/lib/requests";
+import { isOwner } from "@/lib/auth";
 
 async function requireUser() {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!isOwner(user)) redirect("/login");
   return supabase;
 }
 
