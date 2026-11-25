@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isOwner } from "@/lib/auth";
 
 // Обновляет сессию и не пускает в /admin без входа.
 export async function middleware(request: NextRequest) {
@@ -26,7 +27,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user && request.nextUrl.pathname.startsWith("/admin")) {
+  if (!isOwner(user) && request.nextUrl.pathname.startsWith("/admin")) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

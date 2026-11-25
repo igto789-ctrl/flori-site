@@ -3,13 +3,14 @@ import { createUserClient } from "@/lib/supabase/server";
 import type { RequestRow } from "@/lib/requests";
 import AdminHeader from "./AdminHeader";
 import Board from "./Board";
+import { isOwner } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!isOwner(user)) redirect("/login");
 
   const { data, error } = await supabase
     .from("requests")

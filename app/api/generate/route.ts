@@ -2,8 +2,10 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { createServiceClient, createUserClient } from "@/lib/supabase/server";
 import { ASPECTS, DAILY_LIMIT, ImageGenError, generateImage, type Aspect } from "@/lib/imagegen";
-import { usage } from "@/lib/imagegen-usage";
+import { GEN_WINDOW_SEC, usage } from "@/lib/imagegen-usage";
+import { takeLimits } from "@/lib/rate-limit";
 import { IMAGE_TYPES, MAX_FILE_BYTES } from "@/lib/scan";
+import { isOwner } from "@/lib/auth";
 
 export const maxDuration = 60;
 
@@ -11,16 +13,7 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Сначала войдите в админку" }, { status: 401 });
-
-  const limit = await usage(supabase);
-  if (limit.remaining === 0) {
-    const when = limit.nextAt?.toLocaleTimeString("ru-RU", { timeZone: "Europe/Chisinau", hour: "2-digit", minute: "2-digit" });
-    return NextResponse.json(
-      { limit: true, error: `Лимит исчерпан: ${DAILY_LIMIT} генераций за 24 часа. Следующая будет доступна${when ? ` в ${when}` : " позже"}.` },
-      { status: 429 }
-    );
-  }
+  if (!isOwner(user)) return NextResponse.json({ error: "Сначала войдите в админку" }, { status: 401 });
 
   const form = await req.formData().catch(() => null);
   const prompt = String(form?.get("prompt") ?? "").trim();
@@ -36,6 +29,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Исходник должен быть фото (JPG, PNG)" }, { status: 400 });
     if (photo.size > MAX_FILE_BYTES) return NextResponse.json({ error: "Фото больше 4 МБ" }, { status: 400 });
     source = { data: Buffer.from(await photo.arrayBuffer()), mimeType: photo.type };
+  }
+
+  // Слот занимается атомарно ДО обращения к Google: параллельные запросы не обойдут лимит. Слот не возвращается.
+  if (!(await takeLimits([{ kind: "gen", id: user.id, limit: DAILY_LIMIT, windowSec: GEN_WINDOW_SEC }]))) {
+    const limit = await usage(user.id);
+    const when = limit.nextAt?.toLocaleTimeString("ru-RU", { timeZone: "Europe/Chisinau", hour: "2-digit", minute: "2-digit" });
+    return NextResponse.json(
+      { limit: true, error: `Лимит исчерпан: ${DAILY_LIMIT} генераций в сутки. Следующая будет доступна${when ? ` в ${when}` : " позже"}.` },
+      { status: 429 }
+    );
   }
 
   let image;
@@ -63,5 +66,5 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: `Не удалось записать в историю: ${error.message}` }, { status: 500 });
 
   const { data: signed } = await admin.storage.from("documents").createSignedUrl(resultPath, 3600);
-  return NextResponse.json({ id, url: signed?.signedUrl, remaining: limit.remaining - 1 });
+  return NextResponse.json({ id, url: signed?.signedUrl, remaining: (await usage(user.id)).remaining });
 }

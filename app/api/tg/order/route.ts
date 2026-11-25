@@ -4,12 +4,17 @@ import { telegramName, verifyInitData } from "@/lib/telegram-auth";
 import { findBouquet } from "@/lib/catalog";
 import { validateClient, type RequestRow } from "@/lib/requests";
 import { notifyTelegram } from "@/lib/telegram";
+import { takeLimits } from "@/lib/rate-limit";
 
 // Заказ из Mini App → карточка в CRM: этап «Новая», источник «Telegram», имя из Telegram.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
   const user = verifyInitData(body.initData);
   if (!user) return NextResponse.json({ error: "Откройте приложение через бота в Telegram" }, { status: 401 });
+
+  // Не больше 5 заказов в час от одного пользователя Telegram (id из проверенной подписи).
+  if (!(await takeLimits([{ kind: "tg", id: String(user.id), limit: 5, windowSec: 3600 }])))
+    return NextResponse.json({ error: "Слишком много заказов подряд. Попробуйте через час." }, { status: 429 });
 
   const bouquet = findBouquet(body.bouquetId);
   if (!bouquet) return NextResponse.json({ error: "Выберите букет" }, { status: 400 });
@@ -38,8 +43,10 @@ export async function POST(req: Request) {
     .select()
     .single<RequestRow>();
 
-  if (error || !data)
-    return NextResponse.json({ error: `Не удалось сохранить заказ: ${error?.message}` }, { status: 500 });
+  if (error || !data) {
+    console.error("Не удалось сохранить заказ:", error);
+    return NextResponse.json({ error: "Не удалось сохранить заказ. Попробуйте позже." }, { status: 500 });
+  }
 
   try {
     await notifyTelegram(data);

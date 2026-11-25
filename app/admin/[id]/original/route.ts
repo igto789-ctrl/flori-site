@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { createServiceClient, createUserClient } from "@/lib/supabase/server";
+import { isOwner } from "@/lib/auth";
 
 // Открывает оригинал документа: временная ссылка на 5 минут, только для вошедшего владельца.
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.redirect(new URL("/login", req.url));
+  if (!isOwner(user)) return NextResponse.redirect(new URL("/login", req.url));
 
   const { data: row } = await supabase.from("requests").select("document_path").eq("id", id).maybeSingle();
   if (!row?.document_path) return new NextResponse("У этой карточки нет оригинала", { status: 404 });

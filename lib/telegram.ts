@@ -1,6 +1,6 @@
 import { SOURCES, STAGES, formatDate, type RequestRow } from "./requests";
 
-function escapeHtml(text: string) {
+export function escapeHtml(text: string) {
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
